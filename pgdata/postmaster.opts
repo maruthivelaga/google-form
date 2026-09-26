@@ -1,0 +1,1 @@
+/usr/lib/postgresql/16/bin/postgres "-D" "/home/maruthi/Documents/ravi/pgdata" "-h" "127.0.0.1" "-p" "5433" "-k" "/tmp"

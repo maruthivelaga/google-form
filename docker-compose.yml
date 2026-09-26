@@ -1,0 +1,51 @@
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: student_master_db
+    environment:
+      POSTGRES_DB: student_master
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d student_master"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: student_master_backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/student_master
+      PGHOST: db
+      PGPORT: 5432
+      PGDATABASE: student_master
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    restart: unless-stopped
+
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    container_name: student_master_nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+    name: student_master_pgdata
