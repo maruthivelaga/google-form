@@ -21,10 +21,10 @@ app.use(cors());
 app.use(express.json());
 
 // API Routes
-app.use('/api/students', studentRoutes);
-app.use('/api/admin', adminRoutes);
+app.use('/praveentp/students', studentRoutes);
+app.use('/praveentp/admin', adminRoutes);
 
-app.get('/api/health', (req, res) => {
+app.get('/praveentp/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 

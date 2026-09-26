@@ -1,6 +1,6 @@
-// In production (Docker), nginx serves the app at /data-form/ and proxies /data-form/api/ → backend:5000/api/
-// In local dev, Vite proxy forwards /api → localhost:5000
-const API_BASE = import.meta.env.PROD ? '/data-form/api' : '/api';
+// In production (Docker), nginx serves the app at /data-form/ and proxies /data-form/praveentp/ → backend:5000/praveentp/
+// In local dev, Vite proxy forwards /praveentp → localhost:5000
+const API_BASE = import.meta.env.PROD ? '/data-form/praveentp' : '/praveentp';
 
 export const lookupStudent = async (regNo) => {
     const res = await fetch(`${API_BASE}/students/lookup/${encodeURIComponent(regNo)}`);
@@ -21,6 +21,19 @@ export const submitStudentForm = async (formData) => {
     const data = await res.json();
     if (!res.ok) {
         throw new Error(data.message || 'Failed to submit form');
+    }
+    return data;
+};
+
+export const adminLogin = async (password) => {
+    const res = await fetch(`${API_BASE}/admin/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.error || 'Authentication failed');
     }
     return data;
 };
@@ -98,4 +111,14 @@ export const getSectionListExportUrl = (filters = {}) => {
     if (filters.section) params.append('section', filters.section);
 
     return `${API_BASE}/admin/export-section-list?${params.toString()}`;
+};
+
+export const getSubmittedExcelExportUrl = (filters = {}) => {
+    const params = new URLSearchParams();
+    if (filters.batch) params.append('batch', filters.batch);
+    if (filters.branch) params.append('branch', filters.branch);
+    if (filters.section) params.append('section', filters.section);
+    if (filters.search) params.append('search', filters.search);
+
+    return `${API_BASE}/admin/export-submitted-excel?${params.toString()}`;
 };

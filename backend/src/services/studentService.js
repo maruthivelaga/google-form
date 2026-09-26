@@ -5,7 +5,7 @@ export const lookupStudentByReg = async (regNo) => {
     if (!cleanReg) return null;
 
     const res = await query(
-        `SELECT id, registration_number, student_name, first_name, last_name, batch, branch, section, submission_status, submitted_at
+        `SELECT id, registration_number, student_name, first_name, middle_name, last_name, batch, branch, section, submission_status, submitted_at
          FROM students 
          WHERE UPPER(registration_number) = $1`,
         [cleanReg]
@@ -37,40 +37,43 @@ export const submitStudentForm = async (data) => {
             UPDATE students SET
                 student_name = $1,
                 first_name = $2,
-                last_name = $3,
-                batch = $4,
-                branch = $5,
-                section = $6,
-                gender = $7,
-                dob = $8,
-                student_mobile = $9,
-                alternate_mobile = $10,
-                personal_email = $11,
-                university_email = $12,
-                tenth_board = $13,
-                tenth_pass_year = $14,
-                tenth_percentage = $15,
-                qualification_after_tenth = $16,
-                inter_diploma_board = $17,
-                inter_diploma_pass_year = $18,
-                inter_diploma_percentage = $19,
-                btech_cgpa = $20,
-                btech_percentage = $21,
-                active_backlogs = $22,
-                total_backlog_history = $23,
-                campus_placement_interest = $24,
-                primary_career_preference = $25,
-                aadhaar_status = $26,
-                aadhaar_number = $27,
-                pan_status = $28,
-                pan_number = $29,
-                passport_status = $30,
-                passport_number = $31,
-                student_declaration = $32,
+                middle_name = $3,
+                last_name = $4,
+                batch = $5,
+                branch = $6,
+                section = $7,
+                gender = $8,
+                dob = $9,
+                student_mobile = $10,
+                alternate_mobile = $11,
+                personal_email = $12,
+                university_email = $13,
+                current_address = $14,
+                permanent_address = $15,
+                tenth_board = $16,
+                tenth_pass_year = $17,
+                tenth_percentage = $18,
+                qualification_after_tenth = $19,
+                inter_diploma_board = $20,
+                inter_diploma_pass_year = $21,
+                inter_diploma_percentage = $22,
+                btech_cgpa = $23,
+                btech_percentage = $24,
+                active_backlogs = $25,
+                total_backlog_history = $26,
+                campus_placement_interest = $27,
+                primary_career_preference = $28,
+                aadhaar_status = $29,
+                aadhaar_number = $30,
+                pan_status = $31,
+                pan_number = $32,
+                passport_status = $33,
+                passport_number = $34,
+                student_declaration = $35,
                 submission_status = 'SUBMITTED',
                 submitted_at = CURRENT_TIMESTAMP,
                 updated_at = CURRENT_TIMESTAMP
-            WHERE UPPER(registration_number) = $33
+            WHERE UPPER(registration_number) = $36
             RETURNING *;
         `;
 
@@ -80,6 +83,7 @@ export const submitStudentForm = async (data) => {
         const params = [
             data.student_name || existing.student_name || null,
             data.first_name || existing.first_name || null,
+            data.middle_name || null,
             data.last_name || existing.last_name || null,
             data.batch || existing.batch,
             data.branch || existing.branch,
@@ -90,6 +94,8 @@ export const submitStudentForm = async (data) => {
             data.alternate_mobile || null,
             data.personal_email || null,
             data.university_email || null,
+            data.current_address || null,
+            data.permanent_address || null,
             data.tenth_board || null,
             parseIntNum(data.tenth_pass_year),
             parseNum(data.tenth_percentage),
@@ -119,8 +125,8 @@ export const submitStudentForm = async (data) => {
         // Insert new student record if not pre-seeded
         const insertSql = `
             INSERT INTO students (
-                registration_number, student_name, first_name, last_name, batch, branch, section,
-                gender, dob, student_mobile, alternate_mobile, personal_email, university_email,
+                registration_number, student_name, first_name, middle_name, last_name, batch, branch, section,
+                gender, dob, student_mobile, alternate_mobile, personal_email, university_email, current_address, permanent_address,
                 tenth_board, tenth_pass_year, tenth_percentage, qualification_after_tenth,
                 inter_diploma_board, inter_diploma_pass_year, inter_diploma_percentage,
                 btech_cgpa, btech_percentage, active_backlogs, total_backlog_history,
@@ -128,7 +134,7 @@ export const submitStudentForm = async (data) => {
                 pan_status, pan_number, passport_status, passport_number, student_declaration, submission_status, submitted_at
             ) VALUES (
                 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17,
-                $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, 'SUBMITTED', CURRENT_TIMESTAMP
+                $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, 'SUBMITTED', CURRENT_TIMESTAMP
             )
             RETURNING *;
         `;
@@ -137,6 +143,7 @@ export const submitStudentForm = async (data) => {
             cleanReg,
             data.student_name || null,
             data.first_name || null,
+            data.middle_name || null,
             data.last_name || null,
             data.batch || '2023-27',
             data.branch || 'CSE',
@@ -147,6 +154,8 @@ export const submitStudentForm = async (data) => {
             data.alternate_mobile || null,
             data.personal_email || null,
             data.university_email || null,
+            data.current_address || null,
+            data.permanent_address || null,
             data.tenth_board || null,
             parseIntNum(data.tenth_pass_year),
             parseNum(data.tenth_percentage),
@@ -448,3 +457,38 @@ export const getSectionWiseNotSubmitted = async (filters = {}) => {
 
     return res.rows;
 };
+
+export const getSubmittedStudentsForExport = async (filters = {}) => {
+    const { batch, branch, section, search } = filters;
+
+    let whereClauses = [`submission_status = 'SUBMITTED'`];
+    let params = [];
+
+    if (batch) {
+        params.push(batch);
+        whereClauses.push(`batch = $${params.length}`);
+    }
+    if (branch) {
+        params.push(branch);
+        whereClauses.push(`branch = $${params.length}`);
+    }
+    if (section) {
+        params.push(section);
+        whereClauses.push(`section = $${params.length}`);
+    }
+    if (search) {
+        params.push(`%${search.trim().toLowerCase()}%`);
+        const searchIdx = params.length;
+        whereClauses.push(`(LOWER(registration_number) LIKE $${searchIdx} OR LOWER(COALESCE(student_name, '')) LIKE $${searchIdx})`);
+    }
+
+    const whereSql = `WHERE ${whereClauses.join(' AND ')}`;
+
+    const res = await query(
+        `SELECT * FROM students ${whereSql} ORDER BY batch ASC, branch ASC, section ASC, registration_number ASC`,
+        params
+    );
+
+    return res.rows;
+};
+

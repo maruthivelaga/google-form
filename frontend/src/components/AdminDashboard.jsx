@@ -6,7 +6,8 @@ import {
     fetchStudentDetails,
     resetStudentStatus,
     getExportCsvUrl,
-    getSectionListExportUrl
+    getSectionListExportUrl,
+    getSubmittedExcelExportUrl
 } from '../services/api';
 import StudentDetailsModal from './StudentDetailsModal';
 import { 
@@ -24,7 +25,8 @@ import {
     RefreshCw,
     AlertCircle,
     GraduationCap,
-    FileDown
+    FileDown,
+    FileSpreadsheet
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -133,6 +135,11 @@ export default function AdminDashboard() {
         window.open(url, '_blank');
     };
 
+    const handleDownloadFilledStudents = () => {
+        const url = getSubmittedExcelExportUrl(filters);
+        window.open(url, '_blank');
+    };
+
     return (
         <div>
             {/* Top Action Header */}
@@ -150,12 +157,12 @@ export default function AdminDashboard() {
                         <RefreshCw size={16} /> Refresh
                     </button>
                     <button 
-                        className="btn btn-secondary" 
-                        onClick={() => handleDownloadSectionList('')}
-                        title="Download Not-Submitted Section-wise List"
-                        style={{ color: 'var(--amber)', borderColor: 'var(--amber)' }}
+                        className="btn btn-primary" 
+                        style={{ backgroundColor: '#10B981', borderColor: '#10B981' }} 
+                        onClick={handleDownloadFilledStudents} 
+                        title="Download Filled Students Master Excel Sheet (.xlsx)"
                     >
-                        <FileDown size={16} /> Not Submitted List
+                        <FileSpreadsheet size={16} /> Download Filled Students Data (.xlsx)
                     </button>
                     <button className="btn btn-primary" onClick={handleExportCsv}>
                         <Download size={16} /> Export Full CSV
@@ -163,7 +170,7 @@ export default function AdminDashboard() {
                 </div>
             </div>
 
-            {/* KPI Cards Grid — 6 cards */}
+            {/* KPI Cards Grid — 5 cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                 {/* Card 1: Total */}
                 <div className="stat-card">
@@ -196,20 +203,6 @@ export default function AdminDashboard() {
                         </div>
                     </div>
                     <div className="stat-value" style={{ color: 'var(--amber)' }}>{stats.pending.toLocaleString()}</div>
-                </div>
-
-                {/* Card 4: Progress */}
-                <div className="stat-card">
-                    <div className="stat-header">
-                        <span>Submission Progress</span>
-                        <div className="stat-icon" style={{ background: '#E0F2FE', color: 'var(--blue)' }}>
-                            <BarChart3 size={20} />
-                        </div>
-                    </div>
-                    <div className="stat-value" style={{ color: 'var(--primary)' }}>{stats.percentage}%</div>
-                    <div className="progress-bar-container">
-                        <div className="progress-bar-fill" style={{ width: `${stats.percentage}%` }} />
-                    </div>
                 </div>
 
                 {/* Card 5: 2nd Year Not Submitted */}

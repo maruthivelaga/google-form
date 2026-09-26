@@ -1,7 +1,7 @@
 import React from 'react';
 import { GraduationCap, ShieldCheck } from 'lucide-react';
 
-export default function Header({ currentView, setCurrentView }) {
+export default function Header({ currentView, setCurrentView, isAdminAuthed, onLogout }) {
     const isAdmin = currentView === 'admin';
 
     return (
@@ -27,6 +27,15 @@ export default function Header({ currentView, setCurrentView }) {
                         <ShieldCheck size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'text-bottom' }} />
                         Admin Dashboard
                     </button>
+                    {isAdminAuthed && onLogout && (
+                        <button
+                            className="btn btn-secondary"
+                            onClick={onLogout}
+                            style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem' }}
+                        >
+                            Logout
+                        </button>
+                    )}
                 </div>
             )}
         </header>

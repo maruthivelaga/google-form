@@ -34,12 +34,20 @@ CREATE TABLE IF NOT EXISTS students (
     pan_number VARCHAR(20),
     passport_status VARCHAR(100),
     passport_number VARCHAR(50),
+    middle_name VARCHAR(100),
+    current_address TEXT,
+    permanent_address TEXT,
     student_declaration VARCHAR(50),
     submission_status VARCHAR(50) NOT NULL DEFAULT 'NOT_SUBMITTED',
     submitted_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Migrations for existing databases
+ALTER TABLE students ADD COLUMN IF NOT EXISTS middle_name VARCHAR(100);
+ALTER TABLE students ADD COLUMN IF NOT EXISTS current_address TEXT;
+ALTER TABLE students ADD COLUMN IF NOT EXISTS permanent_address TEXT;
 
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_students_reg_no ON students(registration_number);
