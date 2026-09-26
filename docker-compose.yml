@@ -41,7 +41,7 @@ services:
       dockerfile: nginx/Dockerfile
     container_name: student_master_nginx
     ports:
-      - "80:80"
+      - "127.0.0.1:8085:80"
     depends_on:
       - backend
     restart: unless-stopped
