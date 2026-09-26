@@ -131,7 +131,8 @@ export const exportCsv = async (req, res) => {
             { key: 'pan_status', header: 'PAN Status' },
             { key: 'pan_number', header: 'PAN Number' },
             { key: 'passport_status', header: 'Passport Status' },
-            { key: 'passport_number', header: 'Passport ID / Number' }
+            { key: 'passport_number', header: 'Passport ID / Number' },
+            { key: 'student_declaration', header: 'Student Declaration' }
         ];
 
         const csvRows = [];

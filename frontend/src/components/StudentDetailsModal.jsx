@@ -65,6 +65,8 @@ export default function StudentDetailsModal({ student, onClose, onResetStatus })
                         <div className="detail-grid">
                             <div className="detail-item"><span className="detail-label">Reg. Number</span><span className="detail-value">{student.registration_number}</span></div>
                             <div className="detail-item"><span className="detail-label">Student Name</span><span className="detail-value">{student.student_name || 'N/A'}</span></div>
+                            {student.first_name && <div className="detail-item"><span className="detail-label">First Name</span><span className="detail-value">{student.first_name}</span></div>}
+                            {student.last_name && <div className="detail-item"><span className="detail-label">Last Name</span><span className="detail-value">{student.last_name}</span></div>}
                             <div className="detail-item"><span className="detail-label">Batch</span><span className="detail-value">{student.batch}</span></div>
                             <div className="detail-item"><span className="detail-label">Branch</span><span className="detail-value">{student.branch}</span></div>
                             <div className="detail-item"><span className="detail-label">Section</span><span className="detail-value">{student.section}</span></div>
