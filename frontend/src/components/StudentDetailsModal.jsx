@@ -1,7 +1,7 @@
 import React from 'react';
-import { X, CheckCircle2, Clock, RefreshCw } from 'lucide-react';
+import { X, CheckCircle2, Clock } from 'lucide-react';
 
-export default function StudentDetailsModal({ student, onClose, onResetStatus }) {
+export default function StudentDetailsModal({ student, onClose }) {
     if (!student) return null;
 
     const isSubmitted = student.submission_status === 'SUBMITTED';
@@ -149,15 +149,6 @@ export default function StudentDetailsModal({ student, onClose, onResetStatus })
                 </div>
 
                 <div className="modal-footer">
-                    {isSubmitted && (
-                        <button 
-                            className="btn btn-secondary" 
-                            style={{ color: 'var(--amber)', borderColor: '#FCD34D' }}
-                            onClick={() => onResetStatus(student.id)}
-                        >
-                            <RefreshCw size={16} /> Reset Submission Status
-                        </button>
-                    )}
                     <button className="btn btn-primary" onClick={onClose}>
                         Close Window
                     </button>

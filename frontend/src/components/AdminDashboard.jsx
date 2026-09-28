@@ -4,7 +4,6 @@ import {
     fetchFilterOptions, 
     fetchAdminStudents, 
     fetchStudentDetails,
-    resetStudentStatus,
     getExportCsvUrl,
     getSectionListExportUrl,
     getSubmittedExcelExportUrl
@@ -17,7 +16,6 @@ import {
     BarChart3, 
     Download, 
     Search, 
-    RotateCcw, 
     Eye, 
     Filter,
     ChevronLeft,
@@ -105,21 +103,6 @@ export default function AdminDashboard() {
         }
     };
 
-    const handleResetStatus = async (id) => {
-        if (!window.confirm('Are you sure you want to reset this student submission status back to NOT_SUBMITTED?')) {
-            return;
-        }
-        try {
-            await resetStudentStatus(id);
-            if (modalOpen && selectedStudent && selectedStudent.id === id) {
-                const updated = await fetchStudentDetails(id);
-                setSelectedStudent(updated);
-            }
-            loadDashboardData();
-        } catch (err) {
-            alert('Failed to reset student status');
-        }
-    };
 
     const handleExportCsv = () => {
         const url = getExportCsvUrl(filters);
@@ -365,22 +348,12 @@ export default function AdminDashboard() {
                                         <td style={{ textAlign: 'right' }}>
                                             <button 
                                                 className="btn btn-secondary" 
-                                                style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', marginRight: '0.4rem' }}
+                                                style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}
                                                 onClick={() => handleViewStudentDetails(std.id)}
                                                 title="View Full Record"
                                             >
                                                 <Eye size={14} /> Details
                                             </button>
-                                            {isSub && (
-                                                <button 
-                                                    className="btn btn-secondary" 
-                                                    style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', color: 'var(--amber)', borderColor: '#FCD34D' }}
-                                                    onClick={() => handleResetStatus(std.id)}
-                                                    title="Reset to Pending"
-                                                >
-                                                    <RotateCcw size={14} /> Reset
-                                                </button>
-                                            )}
                                         </td>
                                     </tr>
                                 );
@@ -420,7 +393,6 @@ export default function AdminDashboard() {
                 <StudentDetailsModal 
                     student={selectedStudent} 
                     onClose={() => setModalOpen(false)}
-                    onResetStatus={handleResetStatus}
                 />
             )}
         </div>

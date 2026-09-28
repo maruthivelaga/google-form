@@ -369,16 +369,6 @@ export const getStudentDetailsById = async (id) => {
     return res.rows[0] || null;
 };
 
-export const resetStudentSubmissionStatus = async (id) => {
-    const res = await query(
-        `UPDATE students 
-         SET submission_status = 'NOT_SUBMITTED', submitted_at = NULL, updated_at = CURRENT_TIMESTAMP 
-         WHERE id = $1 RETURNING *`,
-        [id]
-    );
-    return res.rows[0] || null;
-};
-
 export const getAllStudentsForExport = async (filters = {}) => {
     const { batch, branch, section, status, search } = filters;
 
