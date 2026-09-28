@@ -41,6 +41,7 @@ export default function App() {
 
     const handleLogout = () => {
         sessionStorage.removeItem('admin_authenticated');
+        sessionStorage.removeItem('admin_token');
         setIsAdminAuthed(false);
     };
 

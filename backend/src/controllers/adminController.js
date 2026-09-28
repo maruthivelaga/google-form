@@ -1,5 +1,7 @@
 import * as studentService from '../services/studentService.js';
 import xlsx from 'xlsx';
+import { generateToken } from '../services/tokenService.js';
+import { recordAdminLoginFailure, clearAdminLoginFailures } from '../middleware/rateLimiter.js';
 
 export const getStats = async (req, res) => {
     try {
@@ -86,13 +88,17 @@ export const resetStudent = async (req, res) => {
     }
 };
 
+
 export const login = async (req, res) => {
     try {
         const { password } = req.body;
-        const expectedPassword = process.env.ADMIN_PASSWORD || 'ravisir@978';
-        if (password === expectedPassword) {
-            return res.status(200).json({ success: true, message: 'Authentication successful', token: 'admin-auth-valid' });
+        const expectedPassword = process.env.ADMIN_PASSWORD;
+        if (password && password === expectedPassword) {
+            clearAdminLoginFailures(req);
+            const token = generateToken({ role: 'admin' });
+            return res.status(200).json({ success: true, message: 'Authentication successful', token });
         }
+        recordAdminLoginFailure(req);
         return res.status(401).json({ error: 'Invalid password. Please check and try again.' });
     } catch (error) {
         console.error('Error during admin login:', error);

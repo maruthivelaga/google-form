@@ -2,12 +2,32 @@
 // In local dev, Vite proxy forwards /praveentp → localhost:5000
 const API_BASE = import.meta.env.PROD ? '/data-form/praveentp' : '/praveentp';
 
+const getAuthHeaders = () => {
+    const token = sessionStorage.getItem('admin_token');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+};
+
+const handleAdminResponse = async (res) => {
+    if (res.status === 401) {
+        sessionStorage.removeItem('admin_token');
+        sessionStorage.removeItem('admin_authenticated');
+        window.location.reload();
+        throw new Error('Session expired. Please log in again.');
+    }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+        throw new Error(data.error || data.message || 'Request failed');
+    }
+    return data;
+};
+
 export const lookupStudent = async (regNo) => {
     const res = await fetch(`${API_BASE}/students/lookup/${encodeURIComponent(regNo)}`);
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-        throw new Error('Failed to lookup student');
+        throw new Error(data.error || data.message || 'Failed to lookup student');
     }
-    return res.json();
+    return data;
 };
 
 export const submitStudentForm = async (formData) => {
@@ -18,9 +38,9 @@ export const submitStudentForm = async (formData) => {
         },
         body: JSON.stringify(formData)
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-        throw new Error(data.message || 'Failed to submit form');
+        throw new Error(data.error || data.message || 'Failed to submit form');
     }
     return data;
 };
@@ -31,9 +51,9 @@ export const adminLogin = async (password) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password })
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-        throw new Error(data.error || 'Authentication failed');
+        throw new Error(data.error || data.message || 'Authentication failed');
     }
     return data;
 };
@@ -43,9 +63,10 @@ export const fetchAdminStats = async (filters = {}) => {
     if (filters.batch) params.append('batch', filters.batch);
     if (filters.branch) params.append('branch', filters.branch);
 
-    const res = await fetch(`${API_BASE}/admin/stats?${params.toString()}`);
-    if (!res.ok) throw new Error('Failed to fetch stats');
-    return res.json();
+    const res = await fetch(`${API_BASE}/admin/stats?${params.toString()}`, {
+        headers: { ...getAuthHeaders() }
+    });
+    return handleAdminResponse(res);
 };
 
 export const fetchAdminSections = async (filters = {}) => {
@@ -53,15 +74,17 @@ export const fetchAdminSections = async (filters = {}) => {
     if (filters.batch) params.append('batch', filters.batch);
     if (filters.branch) params.append('branch', filters.branch);
 
-    const res = await fetch(`${API_BASE}/admin/sections?${params.toString()}`);
-    if (!res.ok) throw new Error('Failed to fetch sections');
-    return res.json();
+    const res = await fetch(`${API_BASE}/admin/sections?${params.toString()}`, {
+        headers: { ...getAuthHeaders() }
+    });
+    return handleAdminResponse(res);
 };
 
 export const fetchFilterOptions = async () => {
-    const res = await fetch(`${API_BASE}/admin/options`);
-    if (!res.ok) throw new Error('Failed to fetch filter options');
-    return res.json();
+    const res = await fetch(`${API_BASE}/admin/options`, {
+        headers: { ...getAuthHeaders() }
+    });
+    return handleAdminResponse(res);
 };
 
 export const fetchAdminStudents = async (filters = {}) => {
@@ -74,24 +97,28 @@ export const fetchAdminStudents = async (filters = {}) => {
     if (filters.page) params.append('page', filters.page);
     if (filters.limit) params.append('limit', filters.limit);
 
-    const res = await fetch(`${API_BASE}/admin/students?${params.toString()}`);
-    if (!res.ok) throw new Error('Failed to fetch students');
-    return res.json();
+    const res = await fetch(`${API_BASE}/admin/students?${params.toString()}`, {
+        headers: { ...getAuthHeaders() }
+    });
+    return handleAdminResponse(res);
 };
 
 export const fetchStudentDetails = async (id) => {
-    const res = await fetch(`${API_BASE}/admin/students/${id}`);
-    if (!res.ok) throw new Error('Failed to fetch student details');
-    return res.json();
+    const res = await fetch(`${API_BASE}/admin/students/${id}`, {
+        headers: { ...getAuthHeaders() }
+    });
+    return handleAdminResponse(res);
 };
 
 export const resetStudentStatus = async (id) => {
     const res = await fetch(`${API_BASE}/admin/students/${id}/reset`, {
-        method: 'POST'
+        method: 'POST',
+        headers: { ...getAuthHeaders() }
     });
-    if (!res.ok) throw new Error('Failed to reset student submission');
-    return res.json();
+    return handleAdminResponse(res);
 };
+
+const getAdminToken = () => sessionStorage.getItem('admin_token') || '';
 
 export const getExportCsvUrl = (filters = {}) => {
     const params = new URLSearchParams();
@@ -100,6 +127,8 @@ export const getExportCsvUrl = (filters = {}) => {
     if (filters.section) params.append('section', filters.section);
     if (filters.status) params.append('status', filters.status);
     if (filters.search) params.append('search', filters.search);
+    const token = getAdminToken();
+    if (token) params.append('token', token);
 
     return `${API_BASE}/admin/export?${params.toString()}`;
 };
@@ -109,6 +138,8 @@ export const getSectionListExportUrl = (filters = {}) => {
     if (filters.batch) params.append('batch', filters.batch);
     if (filters.branch) params.append('branch', filters.branch);
     if (filters.section) params.append('section', filters.section);
+    const token = getAdminToken();
+    if (token) params.append('token', token);
 
     return `${API_BASE}/admin/export-section-list?${params.toString()}`;
 };
@@ -119,6 +150,8 @@ export const getSubmittedExcelExportUrl = (filters = {}) => {
     if (filters.branch) params.append('branch', filters.branch);
     if (filters.section) params.append('section', filters.section);
     if (filters.search) params.append('search', filters.search);
+    const token = getAdminToken();
+    if (token) params.append('token', token);
 
     return `${API_BASE}/admin/export-submitted-excel?${params.toString()}`;
 };

@@ -19,7 +19,8 @@ export default function AdminLogin({ onLoginSuccess }) {
         setLoading(true);
         try {
             const data = await adminLogin(password);
-            if (data.success) {
+            if (data.success && data.token) {
+                sessionStorage.setItem('admin_token', data.token);
                 sessionStorage.setItem('admin_authenticated', 'true');
                 onLoginSuccess();
             } else {
