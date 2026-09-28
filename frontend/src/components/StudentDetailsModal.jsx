@@ -66,6 +66,7 @@ export default function StudentDetailsModal({ student, onClose, onResetStatus })
                             <div className="detail-item"><span className="detail-label">Reg. Number</span><span className="detail-value">{student.registration_number}</span></div>
                             <div className="detail-item"><span className="detail-label">Student Name</span><span className="detail-value">{student.student_name || 'N/A'}</span></div>
                             {student.first_name && <div className="detail-item"><span className="detail-label">First Name</span><span className="detail-value">{student.first_name}</span></div>}
+                            {student.middle_name && <div className="detail-item"><span className="detail-label">Middle Name</span><span className="detail-value">{student.middle_name}</span></div>}
                             {student.last_name && <div className="detail-item"><span className="detail-label">Last Name</span><span className="detail-value">{student.last_name}</span></div>}
                             <div className="detail-item"><span className="detail-label">Batch</span><span className="detail-value">{student.batch}</span></div>
                             <div className="detail-item"><span className="detail-label">Branch</span><span className="detail-value">{student.branch}</span></div>
@@ -78,13 +79,15 @@ export default function StudentDetailsModal({ student, onClose, onResetStatus })
                     {/* Section 2: Contact Information */}
                     <div>
                         <h4 className="card-title" style={{ fontSize: '1rem', marginBottom: '0.75rem', paddingBottom: '0.4rem' }}>
-                            2. Contact Information
+                            2. Contact Information & Addresses
                         </h4>
                         <div className="detail-grid">
-                            <div className="detail-item"><span className="detail-label">Student Mobile</span><span className="detail-value">{student.student_mobile || 'N/A'}</span></div>
-                            <div className="detail-item"><span className="detail-label">Alternate Mobile</span><span className="detail-value">{student.alternate_mobile || 'N/A'}</span></div>
                             <div className="detail-item"><span className="detail-label">Personal Email</span><span className="detail-value">{student.personal_email || 'N/A'}</span></div>
                             <div className="detail-item"><span className="detail-label">University Email</span><span className="detail-value">{student.university_email || 'N/A'}</span></div>
+                            <div className="detail-item"><span className="detail-label">Student Mobile</span><span className="detail-value">{student.student_mobile || 'N/A'}</span></div>
+                            <div className="detail-item"><span className="detail-label">Alternate Mobile</span><span className="detail-value">{student.alternate_mobile || 'N/A'}</span></div>
+                            <div className="detail-item" style={{ gridColumn: 'span 2' }}><span className="detail-label">Current Address</span><span className="detail-value">{student.current_address || 'N/A'}</span></div>
+                            <div className="detail-item" style={{ gridColumn: 'span 2' }}><span className="detail-label">Permanent Address</span><span className="detail-value">{student.permanent_address || 'N/A'}</span></div>
                         </div>
                     </div>
 

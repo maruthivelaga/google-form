@@ -22,6 +22,7 @@ const INITIAL_FORM_STATE = {
     registration_number: '',
     student_name: '',
     first_name: '',
+    middle_name: '',
     last_name: '',
     batch: '2023-27',
     branch: 'CSE',
@@ -32,6 +33,8 @@ const INITIAL_FORM_STATE = {
     alternate_mobile: '',
     personal_email: '',
     university_email: '',
+    current_address: '',
+    permanent_address: '',
     tenth_board: 'SSC',
     tenth_pass_year: '2020',
     tenth_percentage: '',
@@ -99,7 +102,7 @@ export default function StudentForm() {
         const { name, value, type, checked } = e.target;
         let val = type === 'checkbox' ? checked : value;
 
-        if (name === 'student_name' || name === 'registration_number' || name === 'pan_number' || name === 'passport_number') {
+        if (name === 'student_name' || name === 'first_name' || name === 'middle_name' || name === 'last_name' || name === 'registration_number' || name === 'pan_number' || name === 'passport_number') {
             val = String(val).toUpperCase();
         } else if (name === 'student_mobile' || name === 'alternate_mobile') {
             val = String(val).replace(/\D/g, '').slice(0, 10);
@@ -122,7 +125,9 @@ export default function StudentForm() {
 
         if (step === 1) {
             if (!formData.registration_number.trim()) newErrors.registration_number = 'Registration Number is required';
-            if (!formData.student_name.trim()) newErrors.student_name = 'Student Name is required';
+            if (!formData.student_name.trim()) newErrors.student_name = 'Student Name as per University Records is required';
+            if (!formData.first_name.trim()) newErrors.first_name = 'First Name as per official records is required';
+            if (!formData.last_name.trim()) newErrors.last_name = 'Last Name as per official records is required';
             if (!formData.batch) newErrors.batch = 'Batch is required';
             if (!formData.branch) newErrors.branch = 'Branch is required';
             if (!formData.section) newErrors.section = 'Section is required';
@@ -137,7 +142,9 @@ export default function StudentForm() {
                 newErrors.student_mobile = 'Enter a valid 10-digit mobile number';
             }
 
-            if (formData.alternate_mobile && !/^\d{10}$/.test(formData.alternate_mobile.trim())) {
+            if (!formData.alternate_mobile.trim()) {
+                newErrors.alternate_mobile = 'Alternate Mobile Number is required';
+            } else if (!/^\d{10}$/.test(formData.alternate_mobile.trim())) {
                 newErrors.alternate_mobile = 'Enter a valid 10-digit mobile number';
             }
 
@@ -151,6 +158,19 @@ export default function StudentForm() {
                 newErrors.university_email = 'University Email ID is required';
             } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.university_email.trim())) {
                 newErrors.university_email = 'Enter a valid email address';
+            }
+
+            if (formData.personal_email.trim() && formData.university_email.trim() &&
+                formData.personal_email.trim().toLowerCase() === formData.university_email.trim().toLowerCase()) {
+                newErrors.university_email = 'Personal Email ID and University Email ID cannot be the same';
+            }
+
+            if (!formData.current_address.trim()) {
+                newErrors.current_address = 'Current Address is required';
+            }
+
+            if (!formData.permanent_address.trim()) {
+                newErrors.permanent_address = 'Permanent Address is required';
             }
         }
 
@@ -179,7 +199,9 @@ export default function StudentForm() {
                 newErrors.btech_cgpa = 'CGPA must be between 0.00 and 10.00';
             }
 
-            if (formData.btech_percentage !== '') {
+            if (!formData.btech_percentage || formData.btech_percentage === '') {
+                newErrors.btech_percentage = 'Current B.Tech Percentage is required';
+            } else {
                 const pct = parseFloat(formData.btech_percentage);
                 if (isNaN(pct) || pct < 0 || pct > 100) {
                     newErrors.btech_percentage = 'Percentage must be between 0 and 100';
@@ -201,11 +223,25 @@ export default function StudentForm() {
             if (!formData.aadhaar_status) newErrors.aadhaar_status = 'Select Aadhaar status';
             if (!formData.pan_status) newErrors.pan_status = 'Select PAN status';
             if (!formData.passport_status) newErrors.passport_status = 'Select Passport status';
-            if (formData.aadhaar_number && !/^\d{12}$/.test(formData.aadhaar_number.trim())) {
+
+            if (!formData.aadhaar_number.trim()) {
+                newErrors.aadhaar_number = 'Aadhaar Number is required';
+            } else if (!/^\d{12}$/.test(formData.aadhaar_number.trim())) {
                 newErrors.aadhaar_number = 'Aadhaar Number must be exactly 12 digits';
             }
-            if (formData.pan_number && !/^[A-Z0-9]{10}$/i.test(formData.pan_number.trim())) {
-                newErrors.pan_number = 'PAN Number must be 10 characters';
+
+            if (formData.pan_status === 'Available') {
+                if (!formData.pan_number.trim()) {
+                    newErrors.pan_number = 'PAN Number is required when PAN Status is Available';
+                } else if (!/^[A-Z0-9]{10}$/i.test(formData.pan_number.trim())) {
+                    newErrors.pan_number = 'PAN Number must be 10 characters';
+                }
+            }
+
+            if (formData.passport_status === 'Available') {
+                if (!formData.passport_number.trim()) {
+                    newErrors.passport_number = 'Passport Number is required when Passport Status is Available';
+                }
             }
         }
 
@@ -375,6 +411,54 @@ export default function StudentForm() {
 
                             <div className="form-group">
                                 <label className="form-label">
+                                    First Name as per official records <span className="required">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    name="first_name"
+                                    className="form-control"
+                                    placeholder="First Name"
+                                    value={formData.first_name}
+                                    onChange={handleChange}
+                                    style={{ textTransform: 'uppercase' }}
+                                />
+                                {errors.first_name && <div className="form-error">{errors.first_name}</div>}
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">
+                                    Middle Name as per official records
+                                </label>
+                                <input
+                                    type="text"
+                                    name="middle_name"
+                                    className="form-control"
+                                    placeholder="Middle Name (if any)"
+                                    value={formData.middle_name}
+                                    onChange={handleChange}
+                                    style={{ textTransform: 'uppercase' }}
+                                />
+                                {errors.middle_name && <div className="form-error">{errors.middle_name}</div>}
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">
+                                    Last Name as per official records <span className="required">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    name="last_name"
+                                    className="form-control"
+                                    placeholder="Last Name / Surname"
+                                    value={formData.last_name}
+                                    onChange={handleChange}
+                                    style={{ textTransform: 'uppercase' }}
+                                />
+                                {errors.last_name && <div className="form-error">{errors.last_name}</div>}
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">
                                     Batch <span className="required">*</span>
                                 </label>
                                 <select
@@ -415,6 +499,7 @@ export default function StudentForm() {
                                     placeholder="e.g. 1, 2"
                                     value={formData.section}
                                     onChange={handleChange}
+                                    style={{ textTransform: 'uppercase' }}
                                 />
                                 {errors.section && <div className="form-error">{errors.section}</div>}
                             </div>
@@ -454,47 +539,15 @@ export default function StudentForm() {
                     </div>
                 )}
 
-                {/* STEP 2: Contact Information */}
+                {/* STEP 2: Contact Information & Address */}
                 {currentStep === 2 && (
                     <div className="card">
                         <div className="card-title">
                             <Phone size={22} />
-                            <span>2. Contact Information</span>
+                            <span>2. Contact Information & Address</span>
                         </div>
 
                         <div className="form-grid">
-                            <div className="form-group">
-                                <label className="form-label">
-                                    Student Mobile Number <span className="required">*</span>
-                                </label>
-                                <input
-                                    type="tel"
-                                    name="student_mobile"
-                                    className="form-control"
-                                    placeholder="10-digit mobile number"
-                                    value={formData.student_mobile}
-                                    onChange={handleChange}
-                                    maxLength={10}
-                                />
-                                {errors.student_mobile && <div className="form-error">{errors.student_mobile}</div>}
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">
-                                    Alternate Mobile Number
-                                </label>
-                                <input
-                                    type="tel"
-                                    name="alternate_mobile"
-                                    className="form-control"
-                                    placeholder="10-digit alternate number"
-                                    value={formData.alternate_mobile}
-                                    onChange={handleChange}
-                                    maxLength={10}
-                                />
-                                {errors.alternate_mobile && <div className="form-error">{errors.alternate_mobile}</div>}
-                            </div>
-
                             <div className="form-group">
                                 <label className="form-label">
                                     Personal Email ID <span className="required">*</span>
@@ -503,7 +556,7 @@ export default function StudentForm() {
                                     type="email"
                                     name="personal_email"
                                     className="form-control"
-                                    placeholder="e.g. student@gmail.com"
+                                    placeholder=""
                                     value={formData.personal_email}
                                     onChange={handleChange}
                                 />
@@ -523,6 +576,68 @@ export default function StudentForm() {
                                     onChange={handleChange}
                                 />
                                 {errors.university_email && <div className="form-error">{errors.university_email}</div>}
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">
+                                    Student Mobile Number <span className="required">*</span>
+                                </label>
+                                <input
+                                    type="tel"
+                                    name="student_mobile"
+                                    className="form-control"
+                                    placeholder="10-digit mobile number"
+                                    value={formData.student_mobile}
+                                    onChange={handleChange}
+                                    maxLength={10}
+                                />
+                                {errors.student_mobile && <div className="form-error">{errors.student_mobile}</div>}
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">
+                                    Alternate Mobile Number <span className="required">*</span>
+                                </label>
+                                <input
+                                    type="tel"
+                                    name="alternate_mobile"
+                                    className="form-control"
+                                    placeholder="10-digit alternate number"
+                                    value={formData.alternate_mobile}
+                                    onChange={handleChange}
+                                    maxLength={10}
+                                />
+                                {errors.alternate_mobile && <div className="form-error">{errors.alternate_mobile}</div>}
+                            </div>
+
+                            <div className="form-group full-width">
+                                <label className="form-label">
+                                    Current Address <span className="required">*</span>
+                                </label>
+                                <textarea
+                                    name="current_address"
+                                    className="form-control"
+                                    rows={3}
+                                    placeholder="Enter your complete current residential address"
+                                    value={formData.current_address}
+                                    onChange={handleChange}
+                                />
+                                {errors.current_address && <div className="form-error">{errors.current_address}</div>}
+                            </div>
+
+                            <div className="form-group full-width">
+                                <label className="form-label">
+                                    Permanent Address <span className="required">*</span>
+                                </label>
+                                <textarea
+                                    name="permanent_address"
+                                    className="form-control"
+                                    rows={3}
+                                    placeholder="Enter your complete permanent home address"
+                                    value={formData.permanent_address}
+                                    onChange={handleChange}
+                                />
+                                {errors.permanent_address && <div className="form-error">{errors.permanent_address}</div>}
                             </div>
                         </div>
                     </div>
@@ -687,7 +802,7 @@ export default function StudentForm() {
 
                             <div className="form-group">
                                 <label className="form-label">
-                                    Current B.Tech Percentage (Optional)
+                                    Current B.Tech Percentage (0-100) <span className="required">*</span>
                                 </label>
                                 <input
                                     type="number"
@@ -801,7 +916,7 @@ export default function StudentForm() {
 
                             <div className="form-group">
                                 <label className="form-label">
-                                    Aadhaar Number
+                                    Aadhaar Number <span className="required">*</span>
                                 </label>
                                 <input
                                     type="text"
@@ -834,7 +949,7 @@ export default function StudentForm() {
 
                             <div className="form-group">
                                 <label className="form-label">
-                                    PAN Number
+                                    PAN Number {formData.pan_status === 'Available' && <span className="required">*</span>}
                                 </label>
                                 <input
                                     type="text"
@@ -868,13 +983,13 @@ export default function StudentForm() {
 
                             <div className="form-group">
                                 <label className="form-label">
-                                    Passport ID / Number
+                                    Passport ID / Number {formData.passport_status === 'Available' && <span className="required">*</span>}
                                 </label>
                                 <input
                                     type="text"
                                     name="passport_number"
                                     className="form-control"
-                                    placeholder="Passport ID (if available)"
+                                    placeholder="Passport ID"
                                     value={formData.passport_number}
                                     onChange={handleChange}
                                     style={{ textTransform: 'uppercase' }}
@@ -906,11 +1021,13 @@ export default function StudentForm() {
                             </h4>
                             <div className="detail-grid">
                                 <div><strong>Reg No:</strong> {(formData.registration_number || '').toUpperCase()}</div>
-                                <div><strong>Name:</strong> {formData.student_name}</div>
+                                <div><strong>Official Name:</strong> {formData.student_name}</div>
+                                <div><strong>First / Last Name:</strong> {formData.first_name} {formData.last_name}</div>
                                 <div><strong>Batch / Branch / Sec:</strong> {formData.batch} - {formData.branch} - {formData.section}</div>
-                                <div><strong>Mobile:</strong> {formData.student_mobile}</div>
-                                <div><strong>Email:</strong> {formData.personal_email}</div>
-                                <div><strong>B.Tech CGPA:</strong> {formData.btech_cgpa}</div>
+                                <div><strong>Mobile / Alt Mobile:</strong> {formData.student_mobile} / {formData.alternate_mobile}</div>
+                                <div><strong>Personal Email:</strong> {formData.personal_email}</div>
+                                <div><strong>University Email:</strong> {formData.university_email}</div>
+                                <div><strong>B.Tech CGPA / %:</strong> {formData.btech_cgpa} / {formData.btech_percentage}%</div>
                             </div>
                         </div>
 

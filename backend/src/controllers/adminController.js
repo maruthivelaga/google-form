@@ -1,4 +1,5 @@
 import * as studentService from '../services/studentService.js';
+import xlsx from 'xlsx';
 
 export const getStats = async (req, res) => {
     try {
@@ -85,6 +86,20 @@ export const resetStudent = async (req, res) => {
     }
 };
 
+export const login = async (req, res) => {
+    try {
+        const { password } = req.body;
+        const expectedPassword = process.env.ADMIN_PASSWORD || 'ravisir@978';
+        if (password === expectedPassword) {
+            return res.status(200).json({ success: true, message: 'Authentication successful', token: 'admin-auth-valid' });
+        }
+        return res.status(401).json({ error: 'Invalid password. Please check and try again.' });
+    } catch (error) {
+        console.error('Error during admin login:', error);
+        return res.status(500).json({ error: 'Server error during login' });
+    }
+};
+
 export const exportCsv = async (req, res) => {
     try {
         const filters = {
@@ -101,6 +116,7 @@ export const exportCsv = async (req, res) => {
             { key: 'registration_number', header: 'Registration Number' },
             { key: 'student_name', header: 'Student Name' },
             { key: 'first_name', header: 'First Name' },
+            { key: 'middle_name', header: 'Middle Name' },
             { key: 'last_name', header: 'Last Name' },
             { key: 'batch', header: 'Batch' },
             { key: 'branch', header: 'Branch' },
@@ -113,6 +129,8 @@ export const exportCsv = async (req, res) => {
             { key: 'alternate_mobile', header: 'Alternate Mobile' },
             { key: 'personal_email', header: 'Personal Email' },
             { key: 'university_email', header: 'University Email' },
+            { key: 'current_address', header: 'Current Address' },
+            { key: 'permanent_address', header: 'Permanent Address' },
             { key: 'tenth_board', header: '10th Board' },
             { key: 'tenth_pass_year', header: '10th Pass Year' },
             { key: 'tenth_percentage', header: '10th Percentage' },
@@ -194,3 +212,81 @@ export const exportSectionList = async (req, res) => {
         return res.status(500).json({ error: 'Failed to export section list' });
     }
 };
+
+// Export all filled/submitted student master data as Excel (.xlsx)
+export const exportSubmittedExcel = async (req, res) => {
+    try {
+        const filters = {
+            batch: req.query.batch,
+            branch: req.query.branch,
+            section: req.query.section,
+            search: req.query.search
+        };
+
+        const students = await studentService.getSubmittedStudentsForExport(filters);
+
+        // Build Excel worksheet with formatted data matching user specification
+        const data = students.map(std => ({
+            'Registration Number': std.registration_number || '',
+            'Student Name': std.student_name || '',
+            'First Name': std.first_name || '',
+            'Middle Name': std.middle_name || '',
+            'Last Name': std.last_name || '',
+            'Batch': std.batch || '',
+            'Branch': std.branch || '',
+            'Section': std.section || '',
+            'Gender': std.gender || '',
+            'Date of Birth': std.dob ? new Date(std.dob).toLocaleDateString() : '',
+            'Personal Email': std.personal_email || '',
+            'University Email': std.university_email || '',
+            'Student Mobile': std.student_mobile || '',
+            'Alternate Mobile': std.alternate_mobile || '',
+            'Current Address': std.current_address || '',
+            'Permanent Address': std.permanent_address || '',
+            '10th Board': std.tenth_board || '',
+            '10th Pass Year': std.tenth_pass_year || '',
+            '10th Percentage': std.tenth_percentage ? `${std.tenth_percentage}%` : '',
+            'Qualification': std.qualification_after_tenth || '',
+            'Board / Institute': std.inter_diploma_board || '',
+            'Pass Year': std.inter_diploma_pass_year || '',
+            'Percentage': std.inter_diploma_percentage ? `${std.inter_diploma_percentage}%` : '',
+            'Current B.Tech CGPA': std.btech_cgpa || '',
+            'B.Tech Percentage': std.btech_percentage ? `${std.btech_percentage}%` : '',
+            'Active Backlogs': std.active_backlogs ?? 0,
+            'Total Backlog History': std.total_backlog_history ?? 0,
+            'Campus Placement Interest': std.campus_placement_interest || '',
+            'Career Preference': std.primary_career_preference || '',
+            'Aadhaar Status': std.aadhaar_status || '',
+            'Aadhaar Number': std.aadhaar_number || '',
+            'PAN Status': std.pan_status || '',
+            'PAN Number': std.pan_number || '',
+            'Passport Status': std.passport_status || '',
+            'Passport ID / Number': std.passport_number || '',
+            'Declaration': std.student_declaration || '',
+            'Submitted At': std.submitted_at ? new Date(std.submitted_at).toLocaleString() : ''
+        }));
+
+        const worksheet = xlsx.utils.json_to_sheet(data);
+
+        // Adjust column widths automatically
+        const colWidths = Object.keys(data[0] || {}).map(key => ({
+            wch: Math.max(key.length, 15)
+        }));
+        worksheet['!cols'] = colWidths;
+
+        const workbook = xlsx.utils.book_new();
+        xlsx.utils.book_append_sheet(workbook, worksheet, 'Filled_Students_Master');
+
+        const buffer = xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+        const filename = `filled_students_master_${new Date().toISOString().slice(0, 10)}.xlsx`;
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        return res.status(200).send(buffer);
+    } catch (error) {
+        console.error('Error exporting submitted excel:', error);
+        return res.status(500).json({ error: 'Failed to export submitted excel' });
+    }
+};
+

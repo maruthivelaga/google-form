@@ -35,7 +35,7 @@ A lightweight, self-hosted web application for collecting and managing student m
 - **Multi-Filter Toolbar**: Batch, Branch, Section, Submission Status (All, Submitted, Pending), and Search by Registration Number or Name.
 - **Student Data Table**: Interactive table with status badges (`✓ Submitted` / `● Pending`), view details modal trigger, and submission status reset button.
 - **Student Details Modal**: Complete view of all 9 submitted form sections.
-- **CSV Export**: Filter-aware CSV export functionality (`/api/admin/export`).
+- **CSV Export**: Filter-aware CSV export functionality (`/praveentp/admin/export`).
 
 ---
 
@@ -146,4 +146,4 @@ npm run dev
 
 - **Student Form**: `http://localhost:3000/`
 - **Admin Dashboard**: `http://localhost:3000/ravikishoretp`
-- **Backend REST API**: `http://localhost:5000/api`
+- **Backend REST API**: `http://localhost:5000/praveentp`
