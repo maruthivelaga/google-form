@@ -24,13 +24,6 @@ export const submitStudentForm = async (data) => {
     // Check database
     const existing = await lookupStudentByReg(cleanReg);
 
-    if (existing && existing.submission_status === 'SUBMITTED') {
-        throw {
-            status: 400,
-            message: 'Student already submitted.'
-        };
-    }
-
     if (existing) {
         // Update query for pre-seeded student
         const updateSql = `
@@ -369,6 +362,97 @@ export const getStudentDetailsById = async (id) => {
     return res.rows[0] || null;
 };
 
+export const updateStudentDetailsById = async (id, data) => {
+    const parseNum = (val) => (val !== undefined && val !== null && val !== '' && !isNaN(val)) ? parseFloat(val) : null;
+    const parseIntNum = (val) => (val !== undefined && val !== null && val !== '' && !isNaN(val)) ? parseInt(val, 10) : null;
+
+    const updateSql = `
+        UPDATE students SET
+            registration_number = COALESCE($1, registration_number),
+            student_name = $2,
+            first_name = $3,
+            middle_name = $4,
+            last_name = $5,
+            batch = COALESCE($6, batch),
+            branch = COALESCE($7, branch),
+            section = COALESCE($8, section),
+            gender = $9,
+            dob = $10,
+            student_mobile = $11,
+            alternate_mobile = $12,
+            personal_email = $13,
+            university_email = $14,
+            current_address = $15,
+            permanent_address = $16,
+            tenth_board = $17,
+            tenth_pass_year = $18,
+            tenth_percentage = $19,
+            qualification_after_tenth = $20,
+            inter_diploma_board = $21,
+            inter_diploma_pass_year = $22,
+            inter_diploma_percentage = $23,
+            btech_cgpa = $24,
+            btech_percentage = $25,
+            active_backlogs = $26,
+            total_backlog_history = $27,
+            campus_placement_interest = $28,
+            primary_career_preference = $29,
+            aadhaar_status = $30,
+            aadhaar_number = $31,
+            pan_status = $32,
+            pan_number = $33,
+            passport_status = $34,
+            passport_number = $35,
+            submission_status = COALESCE($36, submission_status),
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = $37
+        RETURNING *;
+    `;
+
+    const params = [
+        data.registration_number ? String(data.registration_number).trim().toUpperCase() : null,
+        data.student_name || null,
+        data.first_name || null,
+        data.middle_name || null,
+        data.last_name || null,
+        data.batch || null,
+        data.branch || null,
+        data.section || null,
+        data.gender || null,
+        data.dob || null,
+        data.student_mobile || null,
+        data.alternate_mobile || null,
+        data.personal_email || null,
+        data.university_email || null,
+        data.current_address || null,
+        data.permanent_address || null,
+        data.tenth_board || null,
+        parseIntNum(data.tenth_pass_year),
+        parseNum(data.tenth_percentage),
+        data.qualification_after_tenth || null,
+        data.inter_diploma_board || null,
+        parseIntNum(data.inter_diploma_pass_year),
+        parseNum(data.inter_diploma_percentage),
+        parseNum(data.btech_cgpa),
+        parseNum(data.btech_percentage),
+        data.active_backlogs !== undefined && data.active_backlogs !== '' ? parseInt(data.active_backlogs, 10) : 0,
+        data.total_backlog_history !== undefined && data.total_backlog_history !== '' ? parseInt(data.total_backlog_history, 10) : 0,
+        data.campus_placement_interest || null,
+        data.primary_career_preference || null,
+        data.aadhaar_status || null,
+        data.aadhaar_number || null,
+        data.pan_status || null,
+        data.pan_number || null,
+        data.passport_status || null,
+        data.passport_number || null,
+        data.submission_status || null,
+        id
+    ];
+
+    const result = await query(updateSql, params);
+    return result.rows[0] || null;
+};
+
 export const getAllStudentsForExport = async (filters = {}) => {
     const { batch, branch, section, status, search } = filters;
 
@@ -482,3 +566,13 @@ export const getSubmittedStudentsForExport = async (filters = {}) => {
     return res.rows;
 };
 
+export const resetStudentSubmissionStatus = async (id) => {
+    const res = await query(
+        `UPDATE students 
+         SET submission_status = 'PENDING', submitted_at = NULL, updated_at = CURRENT_TIMESTAMP 
+         WHERE id = $1 
+         RETURNING *`,
+        [id]
+    );
+    return res.rows[0] || null;
+};

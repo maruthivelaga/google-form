@@ -9,6 +9,7 @@ import {
     getSubmittedExcelExportUrl
 } from '../services/api';
 import StudentDetailsModal from './StudentDetailsModal';
+import EditStudentModal from './EditStudentModal';
 import { 
     Users, 
     CheckCircle2, 
@@ -17,6 +18,7 @@ import {
     Download, 
     Search, 
     Eye, 
+    Edit,
     Filter,
     ChevronLeft,
     ChevronRight,
@@ -50,6 +52,8 @@ export default function AdminDashboard() {
     const [loading, setLoading] = useState(true);
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
+    const [editingStudent, setEditingStudent] = useState(null);
+    const [editModalOpen, setEditModalOpen] = useState(false);
 
     // Fetch initial dropdown options
     useEffect(() => {
@@ -103,6 +107,18 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleEditStudent = async (idOrStudent) => {
+        try {
+            let data = idOrStudent;
+            if (typeof idOrStudent === 'number' || typeof idOrStudent === 'string') {
+                data = await fetchStudentDetails(idOrStudent);
+            }
+            setEditingStudent(data);
+            setEditModalOpen(true);
+        } catch (err) {
+            alert('Failed to load student details for editing');
+        }
+    };
 
     const handleExportCsv = () => {
         const url = getExportCsvUrl(filters);
@@ -345,7 +361,15 @@ export default function AdminDashboard() {
                                         <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                                             {std.submitted_at ? new Date(std.submitted_at).toLocaleDateString() : '—'}
                                         </td>
-                                        <td style={{ textAlign: 'right' }}>
+                                        <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                                            <button 
+                                                className="btn btn-secondary" 
+                                                style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', marginRight: '0.4rem', color: 'var(--primary)', borderColor: 'var(--primary-light)' }}
+                                                onClick={() => handleEditStudent(std.id)}
+                                                title="Edit Student Record"
+                                            >
+                                                <Edit size={14} /> Edit
+                                            </button>
                                             <button 
                                                 className="btn btn-secondary" 
                                                 style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}
@@ -393,6 +417,18 @@ export default function AdminDashboard() {
                 <StudentDetailsModal 
                     student={selectedStudent} 
                     onClose={() => setModalOpen(false)}
+                    onEdit={(std) => handleEditStudent(std.id)}
+                />
+            )}
+
+            {/* Edit Student Modal */}
+            {editModalOpen && (
+                <EditStudentModal
+                    student={editingStudent}
+                    onClose={() => setEditModalOpen(false)}
+                    onSaveSuccess={() => {
+                        loadDashboardData();
+                    }}
                 />
             )}
         </div>

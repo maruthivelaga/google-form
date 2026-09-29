@@ -110,6 +110,18 @@ export const fetchStudentDetails = async (id) => {
     return handleAdminResponse(res);
 };
 
+export const updateStudentDetails = async (id, studentData) => {
+    const res = await fetch(`${API_BASE}/admin/students/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeaders()
+        },
+        body: JSON.stringify(studentData)
+    });
+    return handleAdminResponse(res);
+};
+
 
 const getAdminToken = () => sessionStorage.getItem('admin_token') || '';
 

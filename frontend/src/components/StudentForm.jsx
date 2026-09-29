@@ -36,7 +36,7 @@ const INITIAL_FORM_STATE = {
     current_address: '',
     permanent_address: '',
     tenth_board: 'SSC',
-    tenth_pass_year: '2020',
+    tenth_pass_year: '',
     tenth_percentage: '',
     qualification_after_tenth: 'Intermediate / 12th',
     inter_diploma_board: 'BIEAP',
