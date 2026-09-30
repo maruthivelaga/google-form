@@ -1,7 +1,7 @@
 import React from 'react';
-import { X, CheckCircle2, Clock } from 'lucide-react';
+import { X, CheckCircle2, Clock, Edit } from 'lucide-react';
 
-export default function StudentDetailsModal({ student, onClose }) {
+export default function StudentDetailsModal({ student, onClose, onEdit }) {
     if (!student) return null;
 
     const isSubmitted = student.submission_status === 'SUBMITTED';
@@ -18,12 +18,23 @@ export default function StudentDetailsModal({ student, onClose }) {
                             Registration Number: <strong>{student.registration_number}</strong>
                         </span>
                     </div>
-                    <button 
-                        onClick={onClose} 
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
-                    >
-                        <X size={24} />
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        {onEdit && (
+                            <button
+                                className="btn btn-secondary"
+                                style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem', color: 'var(--primary)', borderColor: 'var(--primary-light)' }}
+                                onClick={() => { onClose(); onEdit(student); }}
+                            >
+                                <Edit size={14} /> Edit Record
+                            </button>
+                        )}
+                        <button 
+                            onClick={onClose} 
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+                        >
+                            <X size={24} />
+                        </button>
+                    </div>
                 </div>
 
                 <div className="modal-body">

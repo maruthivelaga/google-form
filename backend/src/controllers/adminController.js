@@ -74,6 +74,20 @@ export const getStudentById = async (req, res) => {
     }
 };
 
+export const updateStudent = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updatedStudent = await studentService.updateStudentDetailsById(id, req.body);
+        if (!updatedStudent) {
+            return res.status(404).json({ error: 'Student record not found' });
+        }
+        return res.status(200).json({ message: 'Student record updated successfully', student: updatedStudent });
+    } catch (error) {
+        console.error('Error updating student record:', error);
+        return res.status(500).json({ error: 'Failed to update student record' });
+    }
+};
+
 
 
 export const login = async (req, res) => {
@@ -280,6 +294,20 @@ export const exportSubmittedExcel = async (req, res) => {
     } catch (error) {
         console.error('Error exporting submitted excel:', error);
         return res.status(500).json({ error: 'Failed to export submitted excel' });
+    }
+};
+
+export const resetStudent = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const student = await studentService.resetStudentSubmissionStatus(id);
+        if (!student) {
+            return res.status(404).json({ error: 'Student record not found' });
+        }
+        return res.status(200).json({ message: 'Submission status reset successfully', student });
+    } catch (error) {
+        console.error('Error resetting student status:', error);
+        return res.status(500).json({ error: 'Failed to reset student status' });
     }
 };
 
