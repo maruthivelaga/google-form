@@ -36,11 +36,11 @@ const INITIAL_FORM_STATE = {
     current_address: '',
     permanent_address: '',
     tenth_board: 'SSC',
-    tenth_pass_year: '2020',
+    tenth_pass_year: '',
     tenth_percentage: '',
     qualification_after_tenth: 'Intermediate / 12th',
     inter_diploma_board: 'BIEAP',
-    inter_diploma_pass_year: '2022',
+    inter_diploma_pass_year: '',
     inter_diploma_percentage: '',
     btech_cgpa: '',
     btech_percentage: '',
@@ -749,7 +749,7 @@ export default function StudentForm() {
                                     type="number"
                                     name="inter_diploma_pass_year"
                                     className="form-control"
-                                    placeholder="e.g. 2022"
+                                    placeholder=""
                                     value={formData.inter_diploma_pass_year}
                                     onChange={handleChange}
                                 />
